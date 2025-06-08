@@ -35,5 +35,7 @@ public interface MensajeRepositoryPort {
      * Elimina mensajes que hayan caducado antes de una fecha dada.
      * @param expirationDate Fecha límite de caducidad.
      */
+    Optional<Mensaje> findById(String id); // <-- Nuevo metodo implementado
+    
     void deleteExpiredMessages(LocalDateTime expirationDate);
 }
