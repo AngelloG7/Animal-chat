@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Reaccion {
     private String userId;
-    private String emoji;
+    private String emoji; // Por ejemplo, "👍", "❤️", "😂"
 }
