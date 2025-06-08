@@ -2,6 +2,7 @@
 package com.chat.hexagonal.infrastructure.adapter.in.web;
 
 import com.chat.hexagonal.application.port.in.EnviarMensajeUseCase;
+import com.chat.hexagonal.application.port.in.GestionarReaccionUseCase; // Importamos el nuevo caso de uso
 import com.chat.hexagonal.application.port.out.MensajeRepositoryPort; // Necesario para obtener mensajes
 import com.chat.hexagonal.domain.model.Mensaje;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,27 @@ public class MensajeController {
         return ResponseEntity.ok(mensajes);
     }
 
+    /**
+     * Endpoint para agregar o remover una reacción a un mensaje.
+     *
+     * @param mensajeId El ID del mensaje al que se va a reaccionar (path variable).
+     * @param request El cuerpo de la solicitud con el ID del usuario y el emoji.
+     * @return ResponseEntity con el mensaje actualizado (HTTP 200 OK) o un mensaje de error.
+     */
+    @PostMapping("/{mensajeId}/reaccionar") // Mapea POST a /api/mensajes/{mensajeId}/reaccionar
+    public ResponseEntity<?> reaccionarMensaje(@PathVariable String mensajeId, @RequestBody ReaccionarMensajeRequest request) {
+        try {
+            // Invoca el caso de uso para gestionar la reacción
+            Mensaje mensajeActualizado = gestionarReaccionUseCase.toggleReaccion(mensajeId, request.getUserId(), request.getEmoji());
+            return ResponseEntity.ok(mensajeActualizado);
+        } catch (IllegalArgumentException e) {
+            // Si el mensaje o usuario no se encuentran
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error inesperado al reaccionar al mensaje.");
+        }
+    }
+
     // --- DTOs (Data Transfer Objects) para las solicitudes ---
 
     // DTO para la solicitud de envío de mensaje de texto
@@ -94,5 +116,15 @@ public class MensajeController {
     public static class EnviarMensajeImagenRequest {
         private String imagenUrl;
         private String idRemitente;
+    }
+
+        // --- DTO para la solicitud de reaccionar ---
+    // src/main/java/com/chat/hexagonal/infrastructure/adapter/in/web/dto/ReaccionarMensajeRequest.java
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReaccionarMensajeRequest {
+        private String userId;
+        private String emoji;
     }
 }
