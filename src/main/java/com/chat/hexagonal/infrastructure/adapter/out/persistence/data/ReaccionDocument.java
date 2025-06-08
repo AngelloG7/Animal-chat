@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// No es un @Document principal, es un objeto incrustado o sub-documento
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
