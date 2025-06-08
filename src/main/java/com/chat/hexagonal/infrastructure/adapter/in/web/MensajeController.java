@@ -3,6 +3,7 @@ package com.chat.hexagonal.infrastructure.adapter.in.web;
 
 import com.chat.hexagonal.application.port.in.EnviarMensajeUseCase;
 import com.chat.hexagonal.application.port.in.GestionarReaccionUseCase; // Importamos el nuevo caso de uso
+import com.chat.hexagonal.application.port.in.BuscarMensajesUseCase; // Importamos el nuevo caso de uso
 import com.chat.hexagonal.application.port.out.MensajeRepositoryPort; // Necesario para obtener mensajes
 import com.chat.hexagonal.domain.model.Mensaje;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ import java.util.List;
 public class MensajeController {
 
     private final EnviarMensajeUseCase enviarMensajeUseCase;
-    private final MensajeRepositoryPort mensajeRepositoryPort; // Inyectamos el puerto para obtener mensajes
+    private final MensajeRepositoryPort mensajeRepositoryPort;
+    private final GestionarReaccionUseCase gestionarReaccionUseCase;
+    private final BuscarMensajesUseCase buscarMensajesUseCase; // Inyectamos el nuevo caso de uso
 
     /**
      * Endpoint para enviar un nuevo mensaje de texto.
@@ -93,6 +96,27 @@ public class MensajeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error inesperado al reaccionar al mensaje.");
+        }
+    }
+
+    /**
+     * Endpoint para buscar mensajes por palabra clave y opcionalmente por usuario.
+     *
+     * @param keyword La palabra clave a buscar (requerido).
+     * @param userId Opcional: El ID del usuario para filtrar los mensajes.
+     * @return ResponseEntity con una lista de mensajes que coinciden con la búsqueda (HTTP 200 OK).
+     */
+    @GetMapping("/buscar") // Mapea las solicitudes GET a /api/mensajes/buscar
+    public ResponseEntity<List<Mensaje>> buscarMensajes(
+            @RequestParam String keyword, // Palabra clave, obligatoria
+            @RequestParam(required = false) String userId) { // ID de usuario, opcional
+        try {
+            // Invoca el caso de uso para buscar mensajes
+            List<Mensaje> resultados = buscarMensajesUseCase.buscarMensajes(keyword, userId);
+            return ResponseEntity.ok(resultados);
+        } catch (Exception e) {
+            // Manejo genérico de errores durante la búsqueda
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // O un DTO de error si es más complejo
         }
     }
 
