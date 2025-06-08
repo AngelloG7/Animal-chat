@@ -30,6 +30,12 @@ public class MensajeMongoAdapter implements MensajeRepositoryPort {
     }
 
     @Override
+    public Optional<Mensaje> findById(String id) { // <-- Añadir la implementación de este método
+        return mensajeMongoSpringRepository.findById(id)
+                .map(this::toMensaje);
+    }
+
+    @Override
     public List<Mensaje> findRecentMessages(LocalDateTime sinceFecha) {
         List<MensajeDocument> documents = mensajeMongoSpringRepository.findByFechaEnvioAfterOrderByFechaEnvioDesc(sinceFecha);
         return documents.stream()
